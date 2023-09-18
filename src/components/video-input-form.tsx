@@ -17,7 +17,11 @@ const statusMessage = {
   success: 'Transcrição gerada com sucesso!',
 }
 
-const VideoInputForm = () => {
+interface VideoInputFormProps {
+  onVideoUpload: (id: string) => void
+}
+
+const VideoInputForm = ({ onVideoUpload }: VideoInputFormProps) => {
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [status, setStatus] = useState<Status>('waiting')
 
@@ -94,16 +98,13 @@ const VideoInputForm = () => {
 
     setStatus('generating')
 
-    api
-      .post(`/videos/${response.video.id}/transcription`, {
-        prompt,
-      })
-      .then((data) => {
-        console.log(data)
-      })
-      .finally(() => {
-        setStatus('success')
-      })
+    await api.post(`/videos/${response.video.id}/transcription`, {
+      prompt,
+    })
+
+    setStatus('success')
+
+    onVideoUpload(response.video.id)
   }
 
   const previewURL = useMemo(() => {
